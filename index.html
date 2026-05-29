@@ -1,0 +1,200 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Photo Upscaler & Restorer Pro - Verynt Pro</title>
+  <!-- Google Fonts -->
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Outfit:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="./style.css">
+</head>
+<body>
+  <div class="app-container">
+    <!-- Navbar Header -->
+    <header class="header">
+      <div class="logo-area">
+        <span class="logo-icon">🖼️</span>
+        <h1>Verynt <span class="accent-text">EnhancerPro</span></h1>
+        <span class="badge">100% Client-Side Super-Res</span>
+      </div>
+      <nav class="navigation">
+        <a href="http://localhost:80" class="back-link">← Portal Hub</a>
+      </nav>
+    </header>
+
+    <!-- Main Workspace Split -->
+    <main class="main-split">
+      
+      <!-- Control Panel (Left Pane) -->
+      <section class="control-panel glass-card">
+        <div class="panel-section">
+          <h2>1. Source Image</h2>
+          <!-- File Drag Drop Zone -->
+          <div class="drag-drop-zone" id="drop-zone">
+            <div class="drop-zone-icon">📸</div>
+            <p class="drop-zone-text">Drag & drop low-res photo or <span class="highlight">browse</span></p>
+            <span class="drop-zone-sub">Supports PNG, JPG, WebP up to 12MB</span>
+            <input type="file" id="file-input" accept="image/*" style="display: none;">
+          </div>
+
+          <!-- Image Details Thumbnail (hidden initially) -->
+          <div class="thumbnail-wrapper" id="thumbnail-wrapper" style="display: none;">
+            <div class="thumbnail-details">
+              <span id="img-name">blurry.jpg</span>
+              <span id="img-dims">640 x 480 px</span>
+            </div>
+            <button class="btn-clear" id="btn-remove-image">❌</button>
+          </div>
+        </div>
+
+        <div class="panel-section">
+          <h2>2. Upscaling Resolution</h2>
+          <div class="input-group">
+            <label for="upscale-select">Enhancement Factor</label>
+            <select id="upscale-select">
+              <option value="2">✨ 200% Super-Resolution (Lanczos-3)</option>
+              <option value="4">🌟 400% Ultra-Resolution (Lanczos-3)</option>
+              <option value="1" selected>🎨 100% Enhance Only (Filter restoration)</option>
+            </select>
+          </div>
+        </div>
+
+        <div class="panel-section">
+          <h2>3. Advanced Restorations</h2>
+          
+          <div class="slider-group">
+            <div class="slider-header">
+              <label for="range-denoise">JPEG Denoise Strength</label>
+              <span id="val-denoise">0 (None)</span>
+            </div>
+            <input type="range" id="range-denoise" min="0" max="10" step="1" value="0">
+          </div>
+
+          <div class="slider-group">
+            <div class="slider-header">
+              <label for="range-sharpen">Edge Sharpening</label>
+              <span id="val-sharpen">3 (Balanced)</span>
+            </div>
+            <input type="range" id="range-sharpen" min="0" max="10" step="1" value="3">
+          </div>
+
+          <div class="slider-group">
+            <div class="slider-header">
+              <label for="range-vibrancy">Vibrancy Restoration</label>
+              <span id="val-vibrancy">10%</span>
+            </div>
+            <input type="range" id="range-vibrancy" min="0" max="100" step="5" value="10">
+          </div>
+
+          <div class="toggle-group">
+            <label class="toggle-container">
+              <input type="checkbox" id="check-auto-contrast" checked>
+              <span class="toggle-slider"></span>
+              <span class="toggle-label">Auto-Contrast Color Leveling</span>
+            </label>
+          </div>
+        </div>
+
+        <!-- Carbon Display Ad Sponsor Widget -->
+        <div class="carbon-ad-widget">
+          <div class="carbon-ad-badge">SPONSORED</div>
+          <div class="carbon-ad-content">
+            <div class="carbon-ad-image-placeholder">💻</div>
+            <div class="carbon-ad-text">
+              <strong>Need Faster Speeds?</strong> Support Verynt Suite development by checking out our sponsors.
+            </div>
+          </div>
+        </div>
+      </section>
+
+      <!-- Workspace Area (Right Pane) -->
+      <section class="workspace-area">
+        <div class="workspace-card glass-card">
+          <div class="workspace-header">
+            <div class="workspace-title">
+              <span class="status-indicator active"></span>
+              <h3>High-Tech Restoration Viewport</h3>
+            </div>
+            <div class="workspace-actions">
+              <span class="badge" id="image-status-badge">No Photo Loaded</span>
+            </div>
+          </div>
+
+          <!-- Interactive Compare Viewport Container -->
+          <div class="editor-viewport" id="editor-viewport">
+            <!-- Placeholder -->
+            <div class="editor-placeholder" id="editor-placeholder">
+              <span class="placeholder-icon">🪄</span>
+              <h3>Restoration Canvas</h3>
+              <p>Upload a low-quality or pixelated photo to enhance colors, smooth out artifacts, and upscale dimensions.</p>
+            </div>
+
+            <!-- Overlapping Split slider container -->
+            <div class="split-slider-wrapper" id="split-slider-wrapper" style="display: none;">
+              <!-- Underlay: The Clean Enhanced/Upscaled Image -->
+              <div class="after-layer" id="after-layer">
+                <canvas id="canvas-after"></canvas>
+              </div>
+
+              <!-- Overlay: The Original Blurry Image -->
+              <div class="before-layer" id="before-layer">
+                <canvas id="canvas-before"></canvas>
+              </div>
+
+              <!-- Draggable neon vertical bar separator -->
+              <div class="split-handle" id="split-handle">
+                <div class="split-handle-badge">↔</div>
+              </div>
+            </div>
+
+            <!-- Loading overlay when enhancement calculations run -->
+            <div class="processing-overlay" id="processing-overlay" style="display: none;">
+              <div class="processing-content">
+                <div class="loader-spinner"></div>
+                <h3>Super-Resolution Engine Active...</h3>
+                <p>Computing Lanczos convolutions and bilateral denoising filters 100% locally...</p>
+              </div>
+            </div>
+          </div>
+
+          <!-- Action Buttons -->
+          <div class="action-bar">
+            <button class="btn btn-secondary" id="btn-reset" disabled>
+              🔄 Reset Parameters
+            </button>
+            <button class="btn btn-primary btn-large" id="btn-enhance" disabled>
+              ✨ Run AI Restorer
+            </button>
+            <button class="btn btn-accent btn-large" id="btn-download" disabled>
+              💾 Save Enhanced Photo
+            </button>
+          </div>
+        </div>
+
+        <!-- Status Details Bar -->
+        <div class="status-bar-box glass-card">
+          <div class="status-item">
+            <span class="dot green"></span>
+            <span>Local Reconstruction Core: <strong>Lanczos-3 Active</strong></span>
+          </div>
+          <div class="status-item">
+            <span>Denoise Model: <strong>Spatial Bilateral Filter</strong></span>
+          </div>
+          <div class="status-item">
+            <span>Calculations Cost: <strong>$0.00 / month</strong></span>
+          </div>
+        </div>
+      </section>
+
+    </main>
+  </div>
+
+  <!-- Offscreen hidden canvases for data management -->
+  <canvas id="hidden-source-canvas" style="display: none;"></canvas>
+  <canvas id="hidden-result-canvas" style="display: none;"></canvas>
+
+  <script type="module" src="./main.js"></script>
+</body>
+</html>
